@@ -1,0 +1,78 @@
+/**
+ * SupabaseConnectionRepository - Implements IConnectionRepository
+ */
+
+import { Connection } from "../../../domain";
+import { IConnectionRepository } from "../../../application/connections/AcceptConnectionRequest";
+import { supabaseDb } from "../../../api/supabase";
+import {
+  mapSupabaseRowToConnection,
+  mapConnectionToSupabaseRow,
+  SupabaseConnectionRow,
+} from "./mappers";
+import { normalizeConnectionUsers } from "../../../domain";
+
+export class SupabaseConnectionRepository implements IConnectionRepository {
+  async save(connection: Connection): Promise<Connection> {
+    const row = mapConnectionToSupabaseRow(connection);
+
+    try {
+      const result = await supabaseDb.insert("connections", row);
+
+      if (result.error) {
+        throw new Error(`Failed to save connection: ${result.error.message}`);
+      }
+
+      return connection;
+    } catch (error) {
+      console.error("SupabaseConnectionRepository.save error:", error);
+      throw error;
+    }
+  }
+
+  async findById(id: string): Promise<Connection | null> {
+    try {
+      const result = await supabaseDb.select("connections", { id });
+
+      if (result.error) {
+        throw new Error(`Failed to fetch connection: ${result.error.message}`);
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return null;
+      }
+
+      const row = result.data[0] as SupabaseConnectionRow;
+      return mapSupabaseRowToConnection(row);
+    } catch (error) {
+      console.error("SupabaseConnectionRepository.findById error:", error);
+      throw error;
+    }
+  }
+
+  async findByUserPair(user1Id: string, user2Id: string): Promise<Connection | null> {
+    // Normalize user IDs for consistent ordering
+    const [normalizedUser1, normalizedUser2] = normalizeConnectionUsers(user1Id, user2Id);
+
+    try {
+      const result = await supabaseDb.select("connections", {
+        user1_id: normalizedUser1,
+        user2_id: normalizedUser2,
+      });
+
+      if (result.error) {
+        throw new Error(`Failed to fetch connection: ${result.error.message}`);
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return null;
+      }
+
+      const row = result.data[0] as SupabaseConnectionRow;
+      return mapSupabaseRowToConnection(row);
+    } catch (error) {
+      console.error("SupabaseConnectionRepository.findByUserPair error:", error);
+      throw error;
+    }
+  }
+}
