@@ -10,7 +10,6 @@ import { Toast } from "./src/components/Toast";
 import DevAccountSwitcher from "./src/components/DevAccountSwitcher";
 import { useToastStore } from "./src/state/toastStore";
 import useUserStore from "./src/state/userStore";
-import useConnectionStore from "./src/state/connectionStore";
 import useNotificationStore from "./src/state/notificationStore";
 import { useDataSync } from "./src/hooks/useDataSync";
 import {
@@ -47,9 +46,7 @@ export default function App() {
   const currentUser = useUserStore((s) => s.currentUser);
   const isLoggedIn = useUserStore((s) => s.isLoggedIn);
   const restoreSession = useUserStore((s) => s.restoreSession);
-  const syncConnections = useConnectionStore((s) => s.syncConnections);
-  const syncChats = useConnectionStore((s) => s.syncChats);
-  const { syncWishes, syncNotifications } = useDataSync();
+  const { syncWishes, syncConnections, syncNotifications } = useDataSync();
 
   const notificationListener = useRef<Notifications.Subscription>(null);
   const responseListener = useRef<Notifications.Subscription>(null);
@@ -66,7 +63,6 @@ export default function App() {
       if (state.isLoggedIn && state.currentUser) {
         console.log("User logged in, syncing data for:", state.currentUser.name);
         await syncConnections();
-        await syncChats();
         await syncWishes();
         await syncNotifications();
         // Fetch all users for search functionality
@@ -85,11 +81,10 @@ export default function App() {
     if (isLoggedIn && currentUser) {
       // Sync all data from Supabase
       syncConnections();
-      syncChats();
       syncWishes();
       syncNotifications();
     }
-  }, [isLoggedIn, currentUser?.id, syncConnections, syncChats, syncWishes, syncNotifications]);
+  }, [isLoggedIn, currentUser?.id, syncConnections, syncWishes, syncNotifications]);
 
   // Register for push notifications when user logs in
   useEffect(() => {
@@ -149,10 +144,10 @@ export default function App() {
 
     return () => {
       if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
+        notificationListener.current.remove();
       }
       if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
+        responseListener.current.remove();
       }
     };
   }, [syncWishes, syncNotifications]);

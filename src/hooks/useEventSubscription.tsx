@@ -5,8 +5,9 @@
  * domain events without memory leaks.
  */
 
-import { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { EventEmitter } from "../infrastructure";
+import { DIContainer } from "../infrastructure/DIContainer";
 import { AllDomainEvents } from "../domain";
 
 /**
@@ -111,9 +112,9 @@ export function useEventDrivenData<T>(
   error: Error | null;
   refetch: () => Promise<void>;
 } {
-  const [data, setData] = (global as any).__useStateOverride || useState<T | null>(null);
-  const [loading, setLoading] = (global as any).__useLoadingOverride || useState(false);
-  const [error, setError] = (global as any).__useErrorOverride || useState<Error | null>(null);
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetcherRef = useRef(fetcher);
 
@@ -171,7 +172,7 @@ export function withEventEmitter<P extends { eventEmitter: EventEmitter }>(
   Component: React.ComponentType<P>
 ): React.FC<Omit<P, "eventEmitter">> {
   return (props) => {
-    const emitter = EventEmitter.getInstance(); // Assuming static getInstance
+    const emitter = DIContainer.getInstance().getEventEmitter();
     return <Component {...(props as P)} eventEmitter={emitter} />;
   };
 }
@@ -256,10 +257,9 @@ export function useEventDrivenDataFixed<T>(
   error: Error | null;
   refetch: () => Promise<void>;
 } {
-  // Use React's useState properly
-  const [data, setData] = (React as any).useState<T | null>(null);
-  const [loading, setLoading] = (React as any).useState(false);
-  const [error, setError] = (React as any).useState<Error | null>(null);
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetcherRef = useRef(fetcher);
 

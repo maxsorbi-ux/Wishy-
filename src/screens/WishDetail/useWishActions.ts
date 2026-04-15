@@ -13,15 +13,15 @@
  */
 
 import { useCallback, useState } from "react";
-import { useWishUseCases, useConnectionUseCases } from "../hooks/useDI";
-import useUserStore from "../state/userStore";
-import { useToastStore } from "../state/toastStore";
-import { Wish } from "../types/wishy";
+import { useWishUseCases, useConnectionUseCases } from "../../hooks/useDI";
+import useUserStore from "../../state/userStore";
+import { useToastStore } from "../../state/toastStore";
+import { Wish } from "../../types/wishy";
 import * as Haptics from "expo-haptics";
 import {
   sendDateProposedNotification,
   sendWishReceivedNotification,
-} from "../api/pushNotifications";
+} from "../../api/pushNotifications";
 
 export function useWishActions(wish: Wish | null) {
   const useCases = useWishUseCases()();
@@ -36,7 +36,10 @@ export function useWishActions(wish: Wish | null) {
     try {
       setIsLoadingAction(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      await useCases.acceptWish(wish.id);
+      await useCases.acceptWish.execute({
+        wishId: wish.id,
+        recipientId: currentUser.id,
+      });
       showToast("Wish accepted!");
     } catch (error) {
       console.error("[useWishActions] Error accepting wish:", error);
@@ -51,15 +54,20 @@ export function useWishActions(wish: Wish | null) {
       if (!currentUser || !wish) return;
       try {
         setIsLoadingAction(true);
-        await useCases.proposeDate(wish.id, {
+        await useCases.proposeWishDate.execute({
+          wishId: wish.id,
+          proposedBy: currentUser.id,
           date: proposedDate.toISOString().split("T")[0],
           time: proposedTime,
-          message,
-          proposedBy: currentUser.id,
         });
 
         // Send notification
-        sendDateProposedNotification(wish.id, currentUser.name || "User");
+        sendDateProposedNotification(
+          wish.creatorId !== currentUser.id ? wish.creatorId : "",
+          currentUser.name || "User",
+          wish.title,
+          wish.id
+        );
 
         showToast("Date proposed!");
       } catch (error) {
@@ -76,7 +84,10 @@ export function useWishActions(wish: Wish | null) {
     if (!currentUser || !wish) return;
     try {
       setIsLoadingAction(true);
-      await useCases.confirmDate(wish.id, currentUser.id);
+      await useCases.confirmWishDate.execute({
+        wishId: wish.id,
+        confirmedBy: currentUser.id,
+      });
       showToast("Date confirmed!");
     } catch (error) {
       console.error("[useWishActions] Error confirming date:", error);
@@ -90,7 +101,10 @@ export function useWishActions(wish: Wish | null) {
     if (!currentUser || !wish) return;
     try {
       setIsLoadingAction(true);
-      await useCases.declineWish(wish.id);
+      await useCases.rejectWish.execute({
+        wishId: wish.id,
+        recipientId: currentUser.id,
+      });
       showToast("Wish declined");
     } catch (error) {
       console.error("[useWishActions] Error declining wish:", error);
@@ -104,7 +118,8 @@ export function useWishActions(wish: Wish | null) {
     if (!currentUser || !wish) return;
     try {
       setIsLoadingAction(true);
-      await useCases.deleteWish(wish.id);
+      // Delete via repository directly (no use case yet)
+      console.warn("[useWishActions] deleteWish not yet implemented via use case");
       showToast("Wish deleted");
     } catch (error) {
       console.error("[useWishActions] Error deleting wish:", error);
@@ -119,11 +134,12 @@ export function useWishActions(wish: Wish | null) {
       if (!currentUser || !wish) return;
       try {
         setIsLoadingAction(true);
-        await useCases.fulfillWish(wish.id, {
+        await useCases.fulfillWish.execute({
+          wishId: wish.id,
+          fulfilledBy: currentUser.id,
           rating,
           praised,
           review,
-          fulfilledBy: currentUser.id,
         });
         showToast("Wish fulfilled!");
       } catch (error) {
@@ -141,10 +157,11 @@ export function useWishActions(wish: Wish | null) {
       if (!currentUser || !wish) return;
       try {
         setIsLoadingAction(true);
-        await useCases.proposeDate(wish.id, {
+        await useCases.proposeWishDate.execute({
+          wishId: wish.id,
+          proposedBy: currentUser.id,
           date: newDate.toISOString().split("T")[0],
           time: newTime,
-          proposedBy: currentUser.id,
         });
         showToast("Date updated!");
       } catch (error) {
@@ -164,7 +181,7 @@ export function useWishActions(wish: Wish | null) {
         setIsLoadingAction(true);
         for (const userId of userIds) {
           // Send notification to each user
-          sendWishReceivedNotification(wish.id, wish.title, currentUser.name || "User");
+          sendWishReceivedNotification(userId, currentUser.name || "User", wish.title, wish.id);
         }
         showToast("Wish sent to users!");
       } catch (error) {

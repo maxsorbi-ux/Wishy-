@@ -39,7 +39,9 @@ import useUserStore from "../state/userStore";
 import { useToastStore } from "../state/toastStore";
 
 // Types & utilities
-import { Connection, User, ContactRequest, ConnectionType } from "../types/wishy";
+import { User } from "../types/wishy";
+import { Connection, ConnectionType } from "../domain/connections/Connection";
+import { ConnectionRequest } from "../domain/connections/ConnectionRequest";
 import { cn } from "../utils/cn";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -68,7 +70,7 @@ export default function ConnectionsScreen() {
 
   // Data state
   const [acceptedConnections, setAcceptedConnections] = useState<Connection[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<ContactRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<ConnectionRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
@@ -148,8 +150,8 @@ export default function ConnectionsScreen() {
       try {
         setIsLoadingAction(true);
         await useCases.sendConnectionRequest.execute({
-          initiatorId: currentUser.id,
-          targetUserId,
+          senderId: currentUser.id,
+          receiverId: targetUserId,
         });
         setShowConfirmModal(false);
         setSelectedUserForRequest(null);
@@ -169,8 +171,8 @@ export default function ConnectionsScreen() {
       try {
         setIsLoadingAction(true);
         await useCases.acceptConnectionRequest.execute({
-          connectionRequestId: requestId,
-          acceptedBy: currentUser!.id,
+          requestId: requestId,
+          connectionType: "friend" as ConnectionType,
         });
         showToast("Connection accepted!", "success");
       } catch (error) {
@@ -221,8 +223,8 @@ export default function ConnectionsScreen() {
     searchQuery.trim().length > 0
       ? allUsers.filter((user) => {
           if (user.id === currentUser?.id) return false;
-          if (acceptedConnections.some((c) => c.userId === user.id)) return false;
-          if (pendingRequests.some((r) => r.initiatorId === user.id || r.recipientId === user.id))
+          if (acceptedConnections.some((c) => c.user1Id === user.id || c.user2Id === user.id)) return false;
+          if (pendingRequests.some((r) => r.senderId === user.id || r.receiverId === user.id))
             return false;
 
           const query = searchQuery.toLowerCase();
@@ -363,7 +365,7 @@ export default function ConnectionsScreen() {
               </View>
             ) : (
               acceptedConnections.map((connection) => {
-                const otherUser = allUsers.find((u) => u.id === connection.userId);
+                const otherUser = allUsers.find((u) => u.id === (connection.user1Id === userId ? connection.user2Id : connection.user1Id));
                 return otherUser ? (
                   <Pressable
                     key={connection.id}
@@ -373,16 +375,16 @@ export default function ConnectionsScreen() {
                     <Image
                       source={{
                         uri:
-                          otherUser.profileImageUrl || "https://via.placeholder.com/48",
+                          otherUser.profilePhoto || "https://via.placeholder.com/48",
                       }}
                       className="w-12 h-12 rounded-full bg-gray-200"
                     />
                     <View className="flex-1 ml-3">
                       <Text className="font-semibold text-gray-900">{otherUser.name}</Text>
                       <Text className="text-sm text-gray-500">
-                        {connection.connectionType === "mutual"
-                          ? "Mutual Connection"
-                          : "Connected"}
+                        {connection.type === "friend"
+                          ? "Friend"
+                          : "Relationship"}
                       </Text>
                     </View>
                     <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
@@ -405,9 +407,9 @@ export default function ConnectionsScreen() {
                 const requester = allUsers.find(
                   (u) =>
                     u.id ===
-                    (request.initiatorId === userId
-                      ? request.recipientId
-                      : request.initiatorId)
+                    (request.senderId === userId
+                      ? request.receiverId
+                      : request.senderId)
                 );
                 return requester ? (
                   <View
@@ -418,7 +420,7 @@ export default function ConnectionsScreen() {
                       <Image
                         source={{
                           uri:
-                            requester.profileImageUrl ||
+                            requester.profilePhoto ||
                             "https://via.placeholder.com/48",
                         }}
                         className="w-12 h-12 rounded-full bg-gray-200"
@@ -428,14 +430,14 @@ export default function ConnectionsScreen() {
                           {requester.name}
                         </Text>
                         <Text className="text-xs text-gray-500">
-                          {request.initiatorId === userId
+                          {request.senderId === userId
                             ? "You sent a request"
                             : "Wants to connect"}
                         </Text>
                       </View>
                     </View>
 
-                    {request.initiatorId !== userId && (
+                    {request.senderId !== userId && (
                       <View className="flex-row gap-2">
                         <Pressable
                           onPress={() => handleAcceptRequest(request.id)}
@@ -485,7 +487,7 @@ export default function ConnectionsScreen() {
                 >
                   <Image
                     source={{
-                      uri: user.profileImageUrl || "https://via.placeholder.com/48",
+                      uri: user.profilePhoto || "https://via.placeholder.com/48",
                     }}
                     className="w-12 h-12 rounded-full bg-gray-200"
                   />

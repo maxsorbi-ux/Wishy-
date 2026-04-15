@@ -9,16 +9,16 @@
  */
 
 import { useState, useEffect } from "react";
-import { useRepositories, useEventListeners } from "./useDI";
-import useUserStore from "../state/userStore";
-import { Wish, User } from "../types/wishy";
+import { useRepositories, useEventListeners } from "../../hooks/useDI";
+import useUserStore from "../../state/userStore";
+import { Wish, User } from "../../types/wishy";
 
 export function useWishDetailData(wishId: string) {
   const repositories = useRepositories()();
   const currentUser = useUserStore((s: any) => s.currentUser);
   const allUsers = useUserStore((s: any) => s.allUsers);
 
-  const [wish, setWish] = useState<Wish | null>(null);
+  const [wish, setWish] = useState<any>(null);
   const [connections, setConnections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,39 +56,39 @@ export function useWishDetailData(wishId: string) {
 
   // Subscribe to wish events for real-time updates
   useEventListeners({
-    "wish.sent": (event) => {
+    "wish.sent": (event: any) => {
       if (event.wishId === wishId) {
-        repositories.wishRepository.findById(wishId).then((w) => setWish(w || null));
+        repositories.wishRepository.findById(wishId).then((w: any) => setWish(w || null));
       }
     },
-    "wish.accepted": (event) => {
+    "wish.accepted": (event: any) => {
       if (event.wishId === wishId) {
-        repositories.wishRepository.findById(wishId).then((w) => setWish(w || null));
+        repositories.wishRepository.findById(wishId).then((w: any) => setWish(w || null));
       }
     },
-    "wish.declined": (event) => {
+    "wish.declined": (event: any) => {
       if (event.wishId === wishId) {
         // Parent component handles navigation
       }
     },
-    "wish.deleted": (event) => {
+    "wish.deleted": (event: any) => {
       if (event.wishId === wishId) {
         // Parent component handles navigation
       }
     },
-    "wish.dateProposed": (event) => {
+    "wish.dateProposed": (event: any) => {
       if (event.wishId === wishId) {
-        repositories.wishRepository.findById(wishId).then((w) => setWish(w || null));
+        repositories.wishRepository.findById(wishId).then((w: any) => setWish(w || null));
       }
     },
-    "wish.dateConfirmed": (event) => {
+    "wish.dateConfirmed": (event: any) => {
       if (event.wishId === wishId) {
-        repositories.wishRepository.findById(wishId).then((w) => setWish(w || null));
+        repositories.wishRepository.findById(wishId).then((w: any) => setWish(w || null));
       }
     },
-    "wish.fulfilled": (event) => {
+    "wish.fulfilled": (event: any) => {
       if (event.wishId === wishId) {
-        repositories.wishRepository.findById(wishId).then((w) => setWish(w || null));
+        repositories.wishRepository.findById(wishId).then((w: any) => setWish(w || null));
       }
     },
   });
@@ -100,7 +100,7 @@ export function useWishDetailData(wishId: string) {
         conn.senderId === currentUser.id ? conn.receiverId : conn.senderId
       );
 
-      return allUsers.filter((user) => {
+      return allUsers.filter((user: any) => {
         if (!connectedUserIds.includes(user.id)) return false;
         if (wish.creatorRole === "wisher") {
           return user.role === "wished" || user.role === "both";
@@ -115,13 +115,13 @@ export function useWishDetailData(wishId: string) {
   // Compute target users
   const targets = wish && wish.targetUserIds
     ? wish.targetUserIds
-        .map((userId) => allUsers.find((u) => u.id === userId))
-        .filter((user): user is User => user !== undefined)
+        .map((userId: string) => allUsers.find((u: any) => u.id === userId))
+        .filter((user: any): user is User => user !== undefined)
     : [];
 
   // Compute user roles
   const isOwnWish = wish && wish.creatorId === currentUser?.id;
-  const creator = wish ? allUsers.find((u) => u.id === wish.creatorId) : undefined;
+  const creator = wish ? allUsers.find((u: any) => u.id === wish.creatorId) : undefined;
   const isWished = wish?.creatorRole === "wished";
 
   const canSendToUser =

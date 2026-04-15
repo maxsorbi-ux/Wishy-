@@ -40,7 +40,7 @@ export default function UserProfileScreen() {
   const repos = useRepositories()();
 
   // Data state
-  const [wishes, setWishes] = useState<Wish[]>([]);
+  const [wishes, setWishes] = useState<any[]>([]);
   const [connections, setConnections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,7 +65,7 @@ export default function UserProfileScreen() {
       const enrichedWishes = await batchEnrichWishes(w, repos.wishRecipientRepository);
 
       setWishes(enrichedWishes);
-      setConnections(c.filter((conn) => conn.status === "accepted"));
+      setConnections(c.filter((conn: any) => conn.status === "accepted"));
     } catch (error) {
       console.error("[UserProfileScreen] Error loading data:", error);
     } finally {
@@ -141,6 +141,14 @@ export default function UserProfileScreen() {
       <Text className="text-wishy-gray text-sm">{label}</Text>
     </Pressable>
   );
+
+  if (!user) {
+    return (
+      <View className="flex-1 bg-white justify-center items-center">
+        <Text>User not found</Text>
+      </View>
+    );
+  }
 
   const WishCard = ({ wish }: { wish: Wish }) => (
     <Pressable

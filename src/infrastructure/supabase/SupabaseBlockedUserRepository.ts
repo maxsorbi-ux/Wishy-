@@ -2,9 +2,9 @@
  * SupabaseBlockedUserRepository - Implements IBlockedUserRepository
  */
 
-import { BlockedUser } from "../../../domain";
-import { IBlockedUserRepository } from "../../../application/connections/BlockUser";
-import { supabaseDb } from "../../../api/supabase";
+import { BlockedUser } from "../../domain";
+import { IBlockedUserRepository } from "../../application/connections/BlockUser";
+import { supabaseDb } from "../../api/supabase";
 import {
   mapSupabaseRowToBlockedUser,
   mapBlockedUserToSupabaseRow,

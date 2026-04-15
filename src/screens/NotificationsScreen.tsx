@@ -72,7 +72,7 @@ export default function NotificationsScreen() {
       setNotifications(notifs);
       setPendingRequests(requests);
       // Update badge count
-      const unread = notifs.filter((n) => !n.read).length;
+      const unread = notifs.filter((n: any) => !n.read).length;
       await PushNotifications.setBadgeCountAsync(unread);
     } catch (error) {
       console.error("[NotificationsScreen] Error loading notifications:", error);
@@ -156,8 +156,7 @@ export default function NotificationsScreen() {
         setActionLoading(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         await useCases.acceptConnectionRequest.execute({
-          connectionRequestId: selectedRequest.id,
-          acceptedBy: currentUser.id,
+          requestId: selectedRequest.id,
           connectionType,
         });
         setShowTypeModal(false);
@@ -180,7 +179,7 @@ export default function NotificationsScreen() {
         setActionLoading(true);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         await useCases.declineConnectionRequest.execute({
-          connectionRequestId: requestId,
+          requestId,
         });
         setPendingRequests((prev) => prev.filter((r) => r.id !== requestId));
         showToast("Request declined", "info");
@@ -244,9 +243,9 @@ export default function NotificationsScreen() {
                 const requester = allUsers.find(
                   (u) =>
                     u.id ===
-                    (request.initiatorId === userId
-                      ? request.recipientId
-                      : request.initiatorId)
+                    (request.senderId === userId
+                      ? request.receiverId
+                      : request.senderId)
                 );
                 return requester ? (
                   <View
@@ -257,7 +256,7 @@ export default function NotificationsScreen() {
                       <Image
                         source={{
                           uri:
-                            requester.profileImageUrl ||
+                            requester.profilePhoto ||
                             "https://via.placeholder.com/48",
                         }}
                         className="w-12 h-12 rounded-full bg-gray-200"
@@ -272,7 +271,7 @@ export default function NotificationsScreen() {
                       </View>
                     </View>
 
-                    {request.initiatorId !== userId && (
+                    {request.senderId !== userId && (
                       <View className="flex-row gap-2">
                         <Pressable
                           onPress={() => handleDeclineRequest(request.id)}
@@ -322,7 +321,7 @@ export default function NotificationsScreen() {
                   Recent Activity
                 </Text>
                 {notifications.map((notif) => {
-                  const actor = allUsers.find((u) => u.id === notif.actorId);
+                  const actor = allUsers.find((u) => u.id === notif.relatedId);
                   return (
                     <Pressable
                       key={notif.id}
@@ -338,7 +337,7 @@ export default function NotificationsScreen() {
                         <Image
                           source={{
                             uri:
-                              actor.profileImageUrl ||
+                              actor.profilePhoto ||
                               "https://via.placeholder.com/40",
                           }}
                           className="w-10 h-10 rounded-full bg-gray-200"
@@ -352,7 +351,7 @@ export default function NotificationsScreen() {
                           {notif.message}
                         </Text>
                         <Text className="text-gray-400 text-xs mt-2">
-                          {formatTime(notif.createdAt)}
+                          {formatTime(new Date(notif.createdAt).toISOString())}
                         </Text>
                       </View>
                       {!notif.read && (
@@ -380,7 +379,7 @@ export default function NotificationsScreen() {
             <Text className="text-gray-600 text-sm mb-6">
               How do you want to connect with{" "}
               {selectedRequest &&
-                allUsers.find((u) => u.id === selectedRequest.initiatorId)?.name}
+                allUsers.find((u) => u.id === selectedRequest.senderId)?.name}
               ?
             </Text>
 

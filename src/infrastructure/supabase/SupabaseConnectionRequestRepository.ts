@@ -2,9 +2,9 @@
  * SupabaseConnectionRequestRepository - Implements IConnectionRequestRepository
  */
 
-import { ConnectionRequest } from "../../../domain";
-import { IConnectionRequestRepository } from "../../../application/connections/SendConnectionRequest";
-import { supabaseDb } from "../../../api/supabase";
+import { ConnectionRequest } from "../../domain";
+import { IConnectionRequestRepository } from "../../application/connections/SendConnectionRequest";
+import { supabaseDb } from "../../api/supabase";
 import {
   mapSupabaseRowToConnectionRequest,
   mapConnectionRequestToSupabaseRow,

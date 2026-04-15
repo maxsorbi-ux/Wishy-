@@ -5,7 +5,6 @@
  * Single source of truth for how infrastructure is instantiated.
  */
 
-import { supabaseDb } from "../api/supabase";
 import {
   SupabaseWishRepository,
   SupabaseWishRecipientRepository,
@@ -90,12 +89,10 @@ export class DIContainer {
     );
     this.proposeWishDateUseCase = new ProposeWishDateUseCase(
       this.wishRepository,
-      this.wishRecipientRepository,
       this.eventEmitter
     );
     this.confirmWishDateUseCase = new ConfirmWishDateUseCase(
       this.wishRepository,
-      this.wishRecipientRepository,
       this.eventEmitter
     );
     this.sendConnectionRequestUseCase = new SendConnectionRequestUseCase(

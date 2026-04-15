@@ -55,7 +55,7 @@ export default function ChatScreen() {
     if (!wishId || !currentUser) return;
     try {
       setLoading(true);
-      let wishData = await repos.wishRepository.findById(wishId);
+      let wishData: any = await repos.wishRepository.findById(wishId);
       
       if (wishData) {
         // Enrich wish with recipient data

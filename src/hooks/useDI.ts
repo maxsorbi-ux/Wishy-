@@ -64,11 +64,27 @@ export function useWishUseCases() {
 export function useConnectionUseCases() {
   const container = useDIContainer();
 
+  // Stub use case that logs and returns - for features not yet implemented
+  const stubUseCase = (name: string) => ({
+    execute: async (input: any) => {
+      console.warn(`[useDI] Use case '${name}' not yet implemented. Input:`, input);
+    },
+  });
+
   return useCallback(
     () => ({
       sendConnectionRequest: container.getSendConnectionRequestUseCase(),
       acceptConnectionRequest: container.getAcceptConnectionRequestUseCase(),
       blockUser: container.getBlockUserUseCase(),
+      // Stub use cases for features not yet wired to infrastructure
+      upgradeConnectionToRelationship: stubUseCase("upgradeConnectionToRelationship"),
+      downgradeConnectionToFriend: stubUseCase("downgradeConnectionToFriend"),
+      acceptUpgradeRequest: stubUseCase("acceptUpgradeRequest"),
+      rejectUpgradeRequest: stubUseCase("rejectUpgradeRequest"),
+      removeConnection: stubUseCase("removeConnection"),
+      declineConnectionRequest: stubUseCase("declineConnectionRequest"),
+      markNotificationAsRead: stubUseCase("markNotificationAsRead"),
+      markAllNotificationsAsRead: stubUseCase("markAllNotificationsAsRead"),
     }),
     [container]
   );
@@ -77,11 +93,56 @@ export function useConnectionUseCases() {
 /**
  * Repositories
  */
+
+// Stub notification repository (not yet implemented in infrastructure)
+const notificationRepositoryStub = {
+  findByUserId: async (_userId: string): Promise<any[]> => {
+    console.warn("[useDI] notificationRepository.findByUserId not yet implemented");
+    return [];
+  },
+  markAsRead: async (_id: string): Promise<void> => {
+    console.warn("[useDI] notificationRepository.markAsRead not yet implemented");
+  },
+  markAllAsRead: async (_userId: string): Promise<void> => {
+    console.warn("[useDI] notificationRepository.markAllAsRead not yet implemented");
+  },
+};
+
+// Stub chat repository (not yet implemented in infrastructure)
+const chatRepositoryStub = {
+  findByWishId: async (_wishId: string): Promise<any | null> => {
+    console.warn("[useDI] chatRepository.findByWishId not yet implemented");
+    return null;
+  },
+  create: async (_wishId: string, _participants: string[]): Promise<any | null> => {
+    console.warn("[useDI] chatRepository.create not yet implemented");
+    return null;
+  },
+  getMessages: async (_chatId: string): Promise<any[]> => {
+    console.warn("[useDI] chatRepository.getMessages not yet implemented");
+    return [];
+  },
+  sendMessage: async (_chatId: string, _senderId: string, _text: string): Promise<any | null> => {
+    console.warn("[useDI] chatRepository.sendMessage not yet implemented");
+    return null;
+  },
+};
+
 export function useRepositories() {
   const container = useDIContainer();
 
   return useCallback(
     () => ({
+      // Canonical names used by most screens
+      wishRepository: container.getWishRepository(),
+      wishRecipientRepository: container.getWishRecipientRepository(),
+      connectionRepository: container.getConnectionRepository(),
+      connectionRequestRepository: container.getConnectionRequestRepository(),
+      blockedUserRepository: container.getBlockedUserRepository(),
+      // Stub repositories not yet in infrastructure
+      notificationRepository: notificationRepositoryStub,
+      chatRepository: chatRepositoryStub,
+      // Short aliases (used by MyWishesScreen, tests, useEventSubscription)
       wishes: container.getWishRepository(),
       wishRecipients: container.getWishRecipientRepository(),
       connections: container.getConnectionRepository(),

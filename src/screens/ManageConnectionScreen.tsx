@@ -268,9 +268,9 @@ export default function ManageConnectionScreen() {
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <View className="bg-white rounded-lg p-6 items-center mb-6 border border-gray-200">
             <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center overflow-hidden border-4 border-blue-500 mb-4">
-              {otherUser.profileImageUrl ? (
+              {otherUser.profilePhoto ? (
                 <Image
-                  source={{ uri: otherUser.profileImageUrl }}
+                  source={{ uri: otherUser.profilePhoto }}
                   style={{ width: 96, height: 96 }}
                   contentFit="cover"
                 />

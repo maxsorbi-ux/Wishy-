@@ -9,6 +9,7 @@ import { useCallback } from "react";
 import { Alert } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { ToastType } from "../../state/toastStore";
 
 interface CreateWishActionsParams {
   title: string;
@@ -23,7 +24,7 @@ interface CreateWishActionsParams {
   existingWish: any;
   currentUser: any;
   useCases: any;
-  showToast: (msg: string, type: string) => void;
+  showToast: (msg: string, type?: ToastType) => void;
   navigation: any;
   setImage: (v: string | undefined) => void;
   setLinks: (v: string[]) => void;
@@ -69,7 +70,7 @@ export function useCreateWishActions(params: CreateWishActionsParams) {
 
       try {
         setIsLoading(true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Light);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         const filteredLinks = links.filter((link) => link.trim().length > 0);
 
@@ -95,7 +96,7 @@ export function useCreateWishActions(params: CreateWishActionsParams) {
       } catch (error) {
         console.error("[CreateWishScreen] Error creating wish:", error);
         showToast("Failed to create wish. Please try again.", "error");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Failure);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setIsLoading(false);
       }
     },

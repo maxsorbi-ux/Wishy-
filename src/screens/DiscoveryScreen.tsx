@@ -12,7 +12,7 @@ import { Image } from "expo-image";
 // Phase 4: Use new hooks instead of stores
 import { useRepositories, useEventListeners } from "../hooks/useDI";
 import useUserStore from "../state/userStore";
-import { batchEnrichWishes } from "../utils/enrichWishWithRecipients";
+import { batchEnrichWishes, EnrichedWish } from "../utils/enrichWishWithRecipients";
 import { Wish, WishCategory, CATEGORY_LABELS, User } from "../types/wishy";
 import { cn } from "../utils/cn";
 
@@ -40,7 +40,7 @@ export default function DiscoveryScreen() {
   const repos = useRepositories()();
 
   // Data state
-  const [wishes, setWishes] = useState<Wish[]>([]);
+  const [wishes, setWishes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -130,112 +130,6 @@ export default function DiscoveryScreen() {
       </View>
     );
   }
-
-  return (
-    <View className="flex-1 bg-wishy-white">
-      {/* Home Icon - Top Left Corner */}
-      <Pressable
-        onPress={handleLogoPress}
-        style={{ position: "absolute", top: insets.top + 8, left: 12, zIndex: 50 }}
-        className="w-9 h-9 bg-wishy-white rounded-full items-center justify-center active:opacity-70 shadow-md border border-wishy-paleBlush"
-      >
-        <Ionicons name="home" size={20} color="#8B2252" />
-      </Pressable>
-
-      {/* Category Filter */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ paddingTop: insets.top }}
-        className="max-h-14 border-b border-wishy-paleBlush"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}
-      >
-        {CATEGORIES.map((category) => (
-          <Pressable
-            key={category}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedCategory(category);
-            }}
-            className={cn(
-              "px-4 py-2 rounded-full",
-              selectedCategory === category
-                ? "bg-wishy-black"
-                : "bg-white border border-wishy-paleBlush"
-            )}
-          >
-            <Text
-              className={cn(
-                "text-sm font-medium",
-                selectedCategory === category ? "text-wishy-white" : "text-wishy-black"
-              )}
-            >
-              {category === "all" ? "All" : CATEGORY_LABELS[category]}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      {/* Wishes Grid */}
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16, gap: 16 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#8B2252"
-          />
-        }
-      >
-        {filteredWishes.length === 0 ? (
-          <View className="flex-1 items-center justify-center py-20">
-            <View className="w-20 h-20 bg-wishy-paleBlush rounded-full items-center justify-center mb-4">
-              <Ionicons name="gift-outline" size={40} color="#8B2252" />
-            </View>
-            <Text className="text-wishy-black font-semibold text-lg">No Wishes Received</Text>
-            <Text className="text-wishy-gray mt-2 text-center px-8">
-              When others send you wishes, they will appear here
-            </Text>
-          </View>
-        ) : (
-          filteredWishes.map((wish, index) => {
-            const sender = allUsers.find((u) => u.id === wish.creatorId);
-            return (
-              <Animated.View
-                key={wish.id}
-                entering={FadeInDown.delay(index * 100).duration(400)}
-              >
-                <WishCard
-                  wish={wish}
-                  sender={sender}
-                  onPress={() => handleWishPress(wish.id)}
-                  onUserPress={() => sender && handleUserPress(sender.id)}
-                />
-              </Animated.View>
-            );
-          })
-        )}
-      </ScrollView>
-    </View>
-  );
-}
-
-  const handleWishPress = (wishId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("WishDetail", { wishId });
-  };
-
-  const handleUserPress = (userId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("UserProfile", { userId });
-  };
-
-  const handleLogoPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Landing");
-  };
 
   return (
     <View className="flex-1 bg-wishy-white">

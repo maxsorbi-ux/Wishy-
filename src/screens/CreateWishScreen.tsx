@@ -76,7 +76,7 @@ export default function CreateWishScreen() {
   // State for connected users
   const [connectedUsers, setConnectedUsers] = React.useState<any[]>([]);
 
-  const existingWish = undefined; // useWishRepository().findById(editWishId)
+  const existingWish: any = undefined; // useWishRepository().findById(editWishId)
   const isEditMode = !!existingWish;
 
   // Form state
@@ -120,8 +120,8 @@ export default function CreateWishScreen() {
       if (!currentUser) return;
       try {
         const connections = await repos.connectionRepository.findByUserId(currentUser.id);
-        const acceptedConnections = connections.filter((c) => c.status === "accepted");
-        const connected = acceptedConnections.flatMap((conn) => {
+        const acceptedConnections = connections.filter((c: any) => c.status === "accepted");
+        const connected = acceptedConnections.flatMap((conn: any) => {
           const otherUserId =
             conn.senderId === currentUser.id ? conn.receiverId : conn.senderId;
           const user = allUsers.find((u) => u.id === otherUserId);

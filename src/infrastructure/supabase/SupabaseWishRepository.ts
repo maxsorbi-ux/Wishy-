@@ -2,9 +2,9 @@
  * SupabaseWishRepository - Implements IWishRepository for Supabase persistence
  */
 
-import { Wish } from "../../../domain";
-import { IWishRepository } from "../../../application";
-import { supabaseDb } from "../../../api/supabase";
+import { Wish } from "../../domain";
+import { IWishRepository } from "../../application";
+import { supabaseDb } from "../../api/supabase";
 import {
   mapSupabaseRowToWish,
   mapWishToSupabaseRow,

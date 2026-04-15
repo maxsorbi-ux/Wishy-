@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { User, Wish } from "../types/wishy";
+import { User, Wish } from "../../types/wishy";
 
 export function useWishDetailComputed(
   wish: Wish | null,
@@ -39,8 +39,8 @@ export function useWishDetailComputed(
     if (!wish || !wish.targetUserIds || wish.targetUserIds.length === 0)
       return [];
     return wish.targetUserIds
-      .map((userId) => allUsers.find((u) => u.id === userId))
-      .filter((user): user is User => user !== undefined);
+      .map((userId: string) => allUsers.find((u: any) => u.id === userId))
+      .filter((user: any): user is User => user !== undefined);
   }, [wish, allUsers]);
 
   // User role information

@@ -67,7 +67,7 @@ export default function ProfileScreen() {
       const enrichedWishes = await batchEnrichWishes(w, repos.wishRecipientRepository);
 
       setWishes(enrichedWishes);
-      setConnections(c.filter((conn) => conn.status === "accepted"));
+      setConnections(c.filter((conn: any) => conn.status === "accepted"));
       setNotifications(n || []);
     } catch (error) {
       console.error("[ProfileScreen] Error loading data:", error);
@@ -94,7 +94,7 @@ export default function ProfileScreen() {
         .filter((w) => w.creatorId === currentUser.id && w.status === "fulfilled")
         .reduce((acc, w) => {
           const ratings = w.ratings || [];
-          const avg = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+          const avg = ratings.length > 0 ? ratings.reduce((a: any, b: any) => a + b, 0) / ratings.length : 0;
           return { 
             average: acc.average + avg, 
             praised: acc.praised + (ratings.length > 0 ? 1 : 0),
@@ -501,7 +501,9 @@ export default function ProfileScreen() {
         setShowDeleteModal={setShowDeleteModal}
         onConfirmDelete={confirmDeleteAccount}
         showLogoutModal={showLogoutModal}
-        setShowLogoutMod        setShowLogoutMod        setShowLogoutMod        setShowLogoutMod
+        setShowLogoutModal={setShowLogoutModal}
+        onConfirmLogout={handleLogout}
+      />
     </ScrollView>
     </View>
   );

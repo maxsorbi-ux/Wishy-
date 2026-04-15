@@ -199,7 +199,7 @@ export const supabaseDb = {
    * - A filter object directly: supabaseDb.select("table", { column: value })
    * - An options object: supabaseDb.select("table", { filter: {...}, columns: "...", order: {...} })
    */
-  select: async <T>(
+  select: async <T = any>(
     table: string,
     optionsOrFilter?: Record<string, unknown>
   ): Promise<SupabaseResponse<T>> => {
@@ -287,9 +287,9 @@ export const supabaseDb = {
   /**
    * Insert data into a table
    */
-  insert: async <T>(
+  insert: async <T = any>(
     table: string,
-    data: Record<string, unknown> | Record<string, unknown>[],
+    data: any,
     options?: { returning?: boolean }
   ): Promise<SupabaseResponse<T>> => {
     try {
@@ -321,9 +321,9 @@ export const supabaseDb = {
   /**
    * Update data in a table
    */
-  update: async <T>(
+  update: async <T = any>(
     table: string,
-    data: Record<string, unknown>,
+    data: any,
     filter: Record<string, unknown>
   ): Promise<SupabaseResponse<T>> => {
     try {
@@ -360,7 +360,7 @@ export const supabaseDb = {
   /**
    * Delete data from a table
    */
-  delete: async <T>(
+  delete: async <T = any>(
     table: string,
     filter: Record<string, unknown>
   ): Promise<SupabaseResponse<T>> => {
@@ -397,9 +397,9 @@ export const supabaseDb = {
   /**
    * Upsert data (insert or update)
    */
-  upsert: async <T>(
+  upsert: async <T = any>(
     table: string,
-    data: Record<string, unknown> | Record<string, unknown>[],
+    data: any,
     options?: { onConflict?: string }
   ): Promise<SupabaseResponse<T>> => {
     try {

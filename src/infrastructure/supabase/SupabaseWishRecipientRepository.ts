@@ -2,9 +2,9 @@
  * SupabaseWishRecipientRepository - Implements IWishRecipientRepository
  */
 
-import { WishRecipient } from "../../../domain";
-import { IWishRecipientRepository } from "../../../application";
-import { supabaseDb } from "../../../api/supabase";
+import { WishRecipient } from "../../domain";
+import { IWishRecipientRepository } from "../../application";
+import { supabaseDb } from "../../api/supabase";
 import {
   mapSupabaseRowToWishRecipient,
   mapWishRecipientToSupabaseRow,

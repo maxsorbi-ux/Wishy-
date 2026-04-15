@@ -48,10 +48,10 @@ import {
 } from "../hooks/useDI";
 import useUserStore from "../state/userStore";
 import { useToastStore } from "../state/toastStore";
-import { enrichSingleWish } from "../utils/enrichWishWithRecipients";
+import { enrichSingleWish, EnrichedWish } from "../utils/enrichWishWithRecipients";
 
 // Types & utilities
-import { CATEGORY_LABELS, WISH_STATUS_LABELS, User, Wish } from "../types/wishy";
+import { CATEGORY_LABELS, WISH_STATUS_LABELS, User, Wish, WishCategory, WishStatus } from "../types/wishy";
 import { cn } from "../utils/cn";
 import { WishOriginBadge } from "../components/WishOriginBadge";
 import { WishDirectionIndicator } from "../components/WishDirectionIndicator";
@@ -82,7 +82,7 @@ export default function WishDetailScreen() {
 
   // ==================== STATE ====================
   // Wish Data
-  const [wish, setWish] = useState<Wish | null>(null);
+  const [wish, setWish] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const [connections, setConnections] = useState<any[]>([]);
@@ -336,7 +336,7 @@ export default function WishDetailScreen() {
             <View className="bg-white rounded-2xl p-5 shadow-sm">
               {/* Origin Badge */}
               <WishOriginBadge
-                createdByMe={isOwnWish}
+                createdByMe={!!isOwnWish}
                 isWished={isWished}
                 proposedByUserName={creator?.name}
                 className="mb-3"
@@ -346,7 +346,7 @@ export default function WishDetailScreen() {
               <View className="flex-row items-center justify-between mb-3">
                 <View className="bg-wishy-paleBlush px-3 py-1 rounded-full">
                   <Text className="text-wishy-black text-sm font-medium">
-                    {CATEGORY_LABELS[wish.category]}
+                    {CATEGORY_LABELS[wish.category as WishCategory]}
                   </Text>
                 </View>
                 <View
@@ -385,7 +385,7 @@ export default function WishDetailScreen() {
                                   : "text-wishy-gray"
                     )}
                   >
-                    {WISH_STATUS_LABELS[wish.status] || wish.status}
+                    {WISH_STATUS_LABELS[wish.status as WishStatus] || wish.status}
                   </Text>
                 </View>
               </View>
@@ -474,7 +474,7 @@ export default function WishDetailScreen() {
                         Links
                       </Text>
                     </View>
-                    {wish.links.map((link, index) => (
+                    {wish.links.map((link: string, index: number) => (
                       <Pressable
                         key={index}
                         onPress={() => Linking.openURL(link)}
@@ -567,7 +567,7 @@ export default function WishDetailScreen() {
             className="mt-4"
           >
             <WishDirectionIndicator
-              creator={creator}
+              creator={creator ?? undefined}
               target={target}
               targets={targets.length > 0 ? targets : undefined}
               creatorRole={wish.creatorRole}
@@ -581,7 +581,7 @@ export default function WishDetailScreen() {
               className="mt-4"
             >
               <View className="flex-row flex-wrap gap-2">
-                {wish.tags.map((tag) => (
+                {wish.tags.map((tag: string) => (
                   <View
                     key={tag}
                     className="bg-wishy-paleBlush/50 px-3 py-1 rounded-full"

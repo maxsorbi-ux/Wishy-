@@ -17,6 +17,8 @@ export interface IConnectionRepository {
   save(connection: Connection): Promise<Connection>;
   findById(id: string): Promise<Connection | null>;
   findByUserPair(user1Id: string, user2Id: string): Promise<Connection | null>;
+  findByUserId(userId: string): Promise<Connection[]>;
+  findPendingRequestsForUser(userId: string): Promise<any[]>;
 }
 
 export interface AcceptConnectionRequestInput {
